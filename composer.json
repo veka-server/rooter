@@ -2,7 +2,7 @@
     "name": "veka-server/rooter",
     "description": "Un rooter minimaliste dérivé de Xesau/Router",
     "license": "MIT",
-    "keywords": ["rooter","minimalist", "onefile"],
+    "keywords": ["rooter","minimalist","PSR-15","onefile"],
     "authors": [
         {
             "name": "Vanhaezebrouck Nicolas",
