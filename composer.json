@@ -1,0 +1,21 @@
+{
+    "name": "veka-server/rooter",
+    "description": "Un rooter minimaliste dérivé de Xesau/Router",
+    "license": "MIT",
+    "keywords": ["rooter","minimalist", "onefile"],
+    "authors": [
+        {
+            "name": "Vanhaezebrouck Nicolas",
+            "email": "contact@veka-server.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "VekaServer\\Rooter\\" : "src/"
+        }
+    },
+    "require": {
+        "psr/http-message": "^1.0",
+        "http-interop/http-middleware": "^0.5.0"
+    }
+}
