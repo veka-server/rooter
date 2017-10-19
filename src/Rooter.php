@@ -29,7 +29,7 @@ class Rooter implements MiddlewareInterface {
      * @param callable $error route vers la page 404
      * @param string   $baseNamespace The base namespace
      */
-    public function __construct($error, $baseNamespace = '')
+    public function __construct($error = null, $baseNamespace = '')
     {
         $this->routes = [];
         $this->baseNamespace = $baseNamespace == '' ? '' : $baseNamespace.'\\';
