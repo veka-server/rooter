@@ -46,7 +46,6 @@ $router->get('/home', ['maClasse', 'maMethode']);
 $router->post('/home', ['maClasse', 'maMethode']);
 $router->getAndPost('/home', ['maClasse', 'maMethode']);
 $router->put('/home', ['maClasse', 'maMethode']);
-$router->head('/home', ['maClasse', 'maMethode']);
 $router->delete('/home', ['maClasse', 'maMethode']);
 $router->head('/home', ['maClasse', 'maMethode']);
 $router->option('/home', ['maClasse', 'maMethode']);
