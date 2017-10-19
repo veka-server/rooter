@@ -59,7 +59,7 @@ Executer le router a la main
 $router->dispatchGlobal();
 ```
 
-Utiliser le router comme un middleware PSR-15
+## Utiliser le router comme un middleware PSR-15
 ```php
 // creation du dispatcher
 $Dispatcher = new VekaServer\Dispatcher\Dispatcher();
