@@ -5,7 +5,7 @@ Un rooter minimaliste dérivé de Xesau/Router
 
 Via composer
 ```
-comopser require veka-server/rooter
+composer require veka-server/rooter
 ```
 
 ## Utilisation
