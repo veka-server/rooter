@@ -36,7 +36,7 @@ Exemple 2
 ```php
 $router->get(
     '/home'
-    , ['maClasse', 'maMethode]
+    , ['maClasse', 'maMethode']
 );
 ```
 
@@ -72,7 +72,7 @@ $router->set404(function(){
 });
 
 // ajouter les route ici, par exemple
-$router->get('/home', ['maClasse', 'maMethode]);
+$router->get('/home', ['maClasse', 'maMethode']);
 
 // ajout le middlewares
 $Dispatcher->pipe($router);
