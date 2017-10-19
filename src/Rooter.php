@@ -26,15 +26,16 @@ class Rooter implements MiddlewareInterface {
     /**
      * Initiates the router and sets some default values
      *
-     * @param callable $error         The 404 Not Found handler
+     * @param callable $error route vers la page 404
      * @param string   $baseNamespace The base namespace
      */
     public function __construct($error, $baseNamespace = '')
     {
         $this->routes = [];
-        $this->error = $error;
         $this->baseNamespace = $baseNamespace == '' ? '' : $baseNamespace.'\\';
         $this->currentPrefix = '';
+
+        $this->set404($error);
     }
 
     /**
@@ -238,6 +239,27 @@ class Rooter implements MiddlewareInterface {
     {
         $this->addRoute('CONNECT', $regex, $handler, $forceString);
         return $this;
+    }
+
+    /**
+     * definie la route vers la page d'erreur 404
+     * @param $error
+     */
+    public function set404($error = null){
+
+        if(!empty($error))
+            $this->error = $error;
+        else {
+            $this->error = array(self::class, "default404");
+        }
+    }
+
+    /**
+     * Page d'erreur 404 par default
+     */
+    public function default404(){
+        header('HTTP/1.1 404 Not Found');
+        exit();
     }
 
     /**
