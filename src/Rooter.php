@@ -409,6 +409,10 @@ class Rooter implements MiddlewareInterface {
         $stream->write($data_return);
         $response->withBody($stream);
 
+        // si pas de content-type on le force en text/html
+        if(empty($response->getHeaderLine('Content-Type'))){
+            $response = $response->withHeader('Content-Type', 'text/html');
+        }
         return $response;
     }
 
