@@ -118,7 +118,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the GET route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -132,7 +132,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the GET route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -147,7 +147,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the POST route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -161,7 +161,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the PUT route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -175,7 +175,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the HEAD route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -189,7 +189,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the DELETE route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -203,7 +203,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the OPTIONS route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -217,7 +217,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the TRACE route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
@@ -231,7 +231,7 @@ class Rooter implements MiddlewareInterface {
      * Adds a route to the CONNECT route collection
      *
      * @param string $regex    The path, allowing regex
-     * @param string $handler The handler
+     * @param callable $handler The handler
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
