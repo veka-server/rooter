@@ -360,13 +360,12 @@ class Rooter implements MiddlewareInterface {
 
         $pos = strpos($url, '?');
         return '/'. trim(
-                substr($pos !== false
+                $pos !== false
                     ?   substr($url, 0, $pos)
                     :   $url,
-                    strlen(implode('/', array_slice(explode('/', $script_name), 0, -1)) .'/')),
                 '/');
     }
-
+    
     /**
      * Dispatches the router using data from the $_SERVER global
      *
