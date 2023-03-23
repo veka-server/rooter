@@ -410,12 +410,12 @@ class Rooter implements MiddlewareInterface {
 
         ob_start();
 
-        $this->dispatch(
+        $data_return = $this->dispatch(
             $ServerParams['REQUEST_METHOD'],
             self::extractPage($ServerParams['REQUEST_URI'], $ServerParams['SCRIPT_NAME'])
         );
 
-        $data_return = ob_get_contents();
+        $data_return .= ob_get_contents();
         ob_end_clean();
 
         $stream->write($data_return);
