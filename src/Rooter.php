@@ -68,7 +68,7 @@ class Rooter implements MiddlewareInterface {
     public function route($method, $regex, $handler, $forceString = false)
     {
         if ($method == '*') {
-            $method = ['GET', 'PUT', 'DELETE', 'OPTIONS', 'TRACE', 'POST', 'HEAD'];
+            $method = ['GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'POST', 'HEAD'];
         }
 
         foreach ((array)$method as $m) {
@@ -168,6 +168,20 @@ class Rooter implements MiddlewareInterface {
     public function put($regex, $handler, $forceString = false)
     {
         $this->addRoute('PUT', $regex, $handler, $forceString);
+        return $this;
+    }
+
+    /**
+     * Adds a route to the PATCH route collection
+     *
+     * @param string $regex    The path, allowing regex
+     * @param callable $handler The handler
+     * @param boolean $forceString desactive l'analyse regex. default : false
+     * @return Rooter
+     */
+    public function patch($regex, $handler, $forceString = false)
+    {
+        $this->addRoute('PATCH', $regex, $handler, $forceString);
         return $this;
     }
 
