@@ -271,52 +271,65 @@ class Rooter implements MiddlewareInterface {
      */
     public function dispatch($method, $path)
     {
-        // If there are no routes for that method, just error immediately
+        $params = [];
+        $route = $this->getRouteByURI($method, $path, $params);
+
+        // Nothing found --> error handler
+        if(empty($route)){
+            return $this->call($this->error, [$method, $path]);
+        }
+
+        // Pass the params to the callback, without the full url
+        array_shift($params);
+        $callback = $route[0];
+        $service = $route[1] ?? [];
+
+        return $this->call($callback, array_merge($service, $params));
+    }
+
+    public function getRouteByURI($method, $path, &$params = [])
+    {
         if (!isset($this->routes[$method])) {
-            $h = $this->error;
-            return $h($method, $path);
-        } else {
-            // Loop over all given routes
-            foreach ($this->routes[$method] as $regex => $route) {
-                $len = strlen($regex);
-                if ($len > 0) {
-                    // Get route
-                    $callback = $route[0];
-                    $service = isset($route[1]) ? $route[1] : [];
+            return null;
+        }
 
-                    // Fix missing begin-/
-                    if ($regex[0] != '/')
-                        $regex = '/' . $regex;
-
-                    // Fix trailing /
-                    if ($len > 1 && $regex[$len - 1] == '/')
-                        $regex = substr($regex, 0, -1);
-
-                    if($route['no-regex']) {
-                        $test = ($regex == $path);
-                        $params = array();
-                    } else {
-                        // Prevent @ collision
-                        $regex = str_replace('@', '\\@', $regex);
-                        $test = preg_match('@^' . $regex . '$@', $path, $params);
-                    }
-
-
-                    // If the path matches the pattern
-                    if ($test) {
-                        // Pass the params to the callback, without the full url
-                        array_shift($params);
-
-                        return $this->call($callback, array_merge($service, $params));
-                    }
-
-
-                }
+        foreach ($this->routes[$method] as $regex => $route) {
+            if ($this->checkRoute($regex, $route, $path,$params)) {
+                return $route;
             }
         }
 
-        // Nothing found --> error handler
-        return $this->call($this->error, [$method, $path]);
+        return null;
+    }
+
+    public function checkRoute($regex, $route, $path, &$params)
+    {
+        $len = strlen($regex);
+        if ($len <= 0) {
+            return false;
+        }
+
+        $params = [];
+
+        // Fix missing begin-/
+        if ($regex[0] != '/') {
+            $regex = '/' . $regex;
+        }
+
+        // Fix trailing /
+        if ($len > 1 && $regex[$len - 1] == '/') {
+            $regex = substr($regex, 0, -1);
+        }
+
+        if ($route['no-regex']) {
+            $test = ($regex == $path);
+        } else {
+            // Prevent @ collision
+            $regex = str_replace('@', '\\@', $regex);
+            $test = preg_match('@^' . $regex . '$@', $path, $params);
+        }
+
+        return ($test);
     }
 
     /**
