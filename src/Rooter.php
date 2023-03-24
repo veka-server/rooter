@@ -15,13 +15,14 @@ class Rooter implements MiddlewareInterface {
      * @var callback  $error         The error handler, invoked as ($method, $path)
      * @var string    $baseNamespace The base namespace
      * @var string    $currentPrefix The current route prefix
-     * @var mixed     $services      Application-wide service
      */
     private $routes;
     private $error;
     private $baseNamespace;
     private $currentPrefix;
-    private $service;
+    public RequestHandlerInterface|null $handler = null;
+    public ServerRequestInterface|null $request = null;
+    protected const DEFAULT_404 = "default404";
 
     /**
      * Initiates the router and sets some default values
@@ -39,24 +40,6 @@ class Rooter implements MiddlewareInterface {
     }
 
     /**
-     * Sets a service object, which will be passed as first parameter to every call.
-     *
-     * @param mixed $service The service
-     */
-    public function setService($service) {
-        $this->service = $service;
-    }
-
-    /**
-     * Gets the currently set service
-     *
-     * @return mixed|null The service, or null if none is set.
-     */
-    public function getService() {
-        return $this->service;
-    }
-
-    /**
      * Adds a route to the specified collection
      *
      * @param string|string[] $method  The method(s) this route will react to
@@ -65,52 +48,34 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function route($method, $regex, $handler, $forceString = false)
+    public function route($method, $regex, $handler, $options = [])
     {
         if ($method == '*') {
             $method = ['GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'POST', 'HEAD'];
         }
 
         foreach ((array)$method as $m) {
-            $this->addRoute($m, $regex, $handler, $forceString);
+            $this->addRoute($m, $regex, $handler, $options = []);
         }
 
         return $this;
     }
 
-    private function addRoute($method, $regex, $handler, $forceString = false) {
-        $this->routes[strtoupper($method)][$this->currentPrefix . $regex] = [$handler, $this->service, 'no-regex' => $forceString];
+    private function addRoute($method, $regex, $handler, $options = []) {
+        $this->routes[strtoupper($method)][$this->currentPrefix . $regex] = [$handler, 'no-regex' => $options['no-regex'] ?? false, 'options' => $options];
     }
 
     /**
-     * Prefix a group of routes
+     * Adds a route to the GET route collection
      *
-     * @param string $prefix The prefix
-     * @param callable $routes callable(Router) wherein the mounted routes be added
-     * @param mixed|mixed[]|false Custom service(s) for this route group
+     * @param string $regex    The path, allowing regex
+     * @param callable $handler The handler
+     * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function mount($prefix, callable $routes, $service = false) {
-        // Save current prefix and service
-        $previousPrefix = $this->currentPrefix;
-        $this->currentPrefix = $previousPrefix . $prefix;
-
-        $previousService = null;
-        if ($service !== false){
-            $previousService = $this->service;
-            $this->service = $service;
-        }
-
-        // Add the routes
-        $routes($this);
-
-        // Restore old prefix and service
-        $this->currentPrefix = $previousPrefix;
-
-        if ($service !== false) {
-            $this->service = $previousService;
-        }
-
+    public function get($regex, $handler, $options = [])
+    {
+        $this->addRoute('GET', $regex, $handler, $options);
         return $this;
     }
 
@@ -122,24 +87,10 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function get($regex, $handler, $forceString = false)
+    public function getAndPost($regex, $handler, $options = [])
     {
-        $this->addRoute('GET', $regex, $handler, $forceString);
-        return $this;
-    }
-
-    /**
-     * Adds a route to the GET route collection
-     *
-     * @param string $regex    The path, allowing regex
-     * @param callable $handler The handler
-     * @param boolean $forceString desactive l'analyse regex. default : false
-     * @return Rooter
-     */
-    public function getAndPost($regex, $handler, $forceString = false)
-    {
-        $this->addRoute('GET', $regex, $handler, $forceString);
-        $this->addRoute('POST', $regex, $handler, $forceString);
+        $this->addRoute('GET', $regex, $handler, $options);
+        $this->addRoute('POST', $regex, $handler, $options);
         return $this;
     }
 
@@ -151,9 +102,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function post($regex, $handler, $forceString = false)
+    public function post($regex, $handler, $options = [])
     {
-        $this->addRoute('POST', $regex, $handler, $forceString);
+        $this->addRoute('POST', $regex, $handler, $options);
         return $this;
     }
 
@@ -165,9 +116,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function put($regex, $handler, $forceString = false)
+    public function put($regex, $handler, $options = [])
     {
-        $this->addRoute('PUT', $regex, $handler, $forceString);
+        $this->addRoute('PUT', $regex, $handler, $options);
         return $this;
     }
 
@@ -179,9 +130,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function patch($regex, $handler, $forceString = false)
+    public function patch($regex, $handler, $options = [])
     {
-        $this->addRoute('PATCH', $regex, $handler, $forceString);
+        $this->addRoute('PATCH', $regex, $handler, $options);
         return $this;
     }
 
@@ -193,9 +144,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function head($regex, $handler, $forceString = false)
+    public function head($regex, $handler, $options = [])
     {
-        $this->addRoute('HEAD', $regex, $handler, $forceString);
+        $this->addRoute('HEAD', $regex, $handler, $options);
         return $this;
     }
 
@@ -207,9 +158,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function delete($regex, $handler, $forceString = false)
+    public function delete($regex, $handler, $options = [])
     {
-        $this->addRoute('DELETE', $regex, $handler, $forceString);
+        $this->addRoute('DELETE', $regex, $handler, $options);
         return $this;
     }
 
@@ -221,9 +172,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function options($regex, $handler, $forceString = false)
+    public function options($regex, $handler, $options = [])
     {
-        $this->addRoute('OPTIONS', $regex, $handler, $forceString);
+        $this->addRoute('OPTIONS', $regex, $handler, $options);
         return $this;
     }
 
@@ -235,9 +186,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function trace($regex, $handler, $forceString = false)
+    public function trace($regex, $handler, $options = [])
     {
-        $this->addRoute('TRACE', $regex, $handler, $forceString);
+        $this->addRoute('TRACE', $regex, $handler, $options);
         return $this;
     }
 
@@ -249,9 +200,9 @@ class Rooter implements MiddlewareInterface {
      * @param boolean $forceString desactive l'analyse regex. default : false
      * @return Rooter
      */
-    public function connect($regex, $handler, $forceString = false)
+    public function connect($regex, $handler, $options = [])
     {
-        $this->addRoute('CONNECT', $regex, $handler, $forceString);
+        $this->addRoute('CONNECT', $regex, $handler, $options);
         return $this;
     }
 
@@ -264,7 +215,7 @@ class Rooter implements MiddlewareInterface {
         if(!empty($error))
             $this->error = $error;
         else {
-            $this->error = array(self::class, "default404");
+            $this->error = array(self::class, self::DEFAULT_404);
         }
     }
 
@@ -290,15 +241,15 @@ class Rooter implements MiddlewareInterface {
 
         // Nothing found --> error handler
         if(empty($route)){
-            return $this->call($this->error, [$method, $path]);
+            return $this->call($this->error, [$method, $path], []);
         }
 
         // Pass the params to the callback, without the full url
         array_shift($params);
         $callback = $route[0];
-        $service = $route[1] ?? [];
+        $options = $route['options'];
 
-        return $this->call($callback, array_merge($service, $params));
+        return $this->call($callback, $params, $options);
     }
 
     public function getRouteByURI($method, $path, &$params = [])
@@ -353,7 +304,7 @@ class Rooter implements MiddlewareInterface {
      * @param array $params   The parameters to send to call_user_func_array
      * @return mixed The results from the call
      */
-    private function call($callable, array $params = []) {
+    protected function call($callable, array $params = [], $options = []) {
         if (is_string($callable)) {
             if (strlen($callable) > 0) {
                 if ($callable[0] == '@') {
@@ -377,8 +328,38 @@ class Rooter implements MiddlewareInterface {
             $callable[0] = str_replace('.', '\\', $callable[0]);
         }
 
+        ob_start();
+
         // Call the callable
-        return call_user_func_array($callable, $params);
+        $data = call_user_func_array($callable, $params);
+
+        $dataFromEcho = ob_get_contents();
+        ob_end_clean();
+
+        $data = $data ?? ($dataFromEcho ?? '');
+
+        // si pas en mode middleware
+        if(is_null($this->handler)){
+            return $data;
+        }
+
+        // si nous avons directement une response
+        if($data instanceof ResponseInterface){
+            return $data;
+        }
+
+        // sinon on genere une response
+        $response = $this->handler->handle($this->request);
+        $stream = $response->getBody();
+        $stream->write($data);
+        $response->withBody($stream);
+
+        // si pas de content-type on le force en text/html
+        if(empty($response->getHeaderLine('Content-Type'))){
+            $response = $response->withHeader('Content-Type', 'text/html');
+        }
+
+        return $response;
     }
 
     public static function extractPage($request_uri, $script_name){
@@ -416,29 +397,16 @@ class Rooter implements MiddlewareInterface {
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $response = $handler->handle($request);
-
-        $stream = $response->getBody();
-
+        $this->handler = $handler;
+        $this->request = $request;
         $ServerParams = $request->getServerParams();
 
-        ob_start();
-
-        $data_return = $this->dispatch(
+        $response = $this->dispatch(
             $ServerParams['REQUEST_METHOD'],
-            self::extractPage($ServerParams['REQUEST_URI'], $ServerParams['SCRIPT_NAME'])
+            self::extractPage($ServerParams['REQUEST_URI'], $ServerParams['SCRIPT_NAME']),
+            $request
         );
 
-        $data_return .= ob_get_contents();
-        ob_end_clean();
-
-        $stream->write($data_return);
-        $response->withBody($stream);
-
-        // si pas de content-type on le force en text/html
-        if(empty($response->getHeaderLine('Content-Type'))){
-            $response = $response->withHeader('Content-Type', 'text/html');
-        }
         return $response;
     }
 
